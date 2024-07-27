@@ -1,7 +1,11 @@
 PROJECT_NAME:=raylib_c
 SRC:=main.c
 CC:=gcc
-FLAGS:=-Wall
+CFLAGS:=-Wall
+INCLUDE=-Irlights.h
 
 all:
-	$(CC) $(FLAGS) $(SRC) -o $(PROJECT_NAME)
+	$(CC) $(CFLAGS) $(shell pkg-config --libs --cflags raylib) $(SRC) $(INCLUDE) -o $(PROJECT_NAME)
+
+clear:
+	rm -vf $(PROJECT_NAME)
