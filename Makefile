@@ -6,6 +6,7 @@ INCLUDE=-Irlights.h
 
 all:
 	$(CC) $(CFLAGS) $(shell pkg-config --libs --cflags raylib) $(SRC) $(INCLUDE) -o $(PROJECT_NAME)
-
+start:
+	./$(PROJECT_NAME)
 clear:
 	rm -vf $(PROJECT_NAME)
