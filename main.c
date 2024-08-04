@@ -11,6 +11,7 @@ int main(void) {
   InitWindow(screenWidth, screenHeight, ".");
   SetMouseCursor(MOUSE_CURSOR_ARROW);
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+  int i = 0;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
@@ -29,7 +30,8 @@ int main(void) {
     } else {
       if ((int)mouse_pos.x <= screenWidth / 2) {
         printf("Player 1 is holder \n");
-        DrawCircle(140, mouse_pos.y + 50, 20.0f, BLACK);
+        DrawCircle(140 + i, mouse_pos.y + 50, 20.0f, BLACK);
+        i += 5;
       } else {
         printf("Player 2 is holder \n");
         DrawCircle(screenWidth - 120, mouse_pos.y + 50, 20.0f, BLACK);
@@ -47,6 +49,8 @@ int main(void) {
                     Fade(RED, 0.9f));
       DrawRectangle(100, (screenHeight - 100) / 2, 20, 100, Fade(GREEN, 0.9f));
     }
+
+    i = i < 380 ? i : 380;
 
     EndDrawing();
   }
