@@ -9,7 +9,7 @@ raylib_c:
 
 .PHONY: start
 start: clear raylib_c
-	./$(PROJECT_NAME)
+	XDG_RUNTIME_DIR=/run/user/$$UID ./$(PROJECT_NAME)
 
 .PHOMY: clear
 clear:
