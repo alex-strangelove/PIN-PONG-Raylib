@@ -57,6 +57,7 @@ int main(void)
   int rectX = (screenWidth - rectWidth) / 2;
   int rectY = (screenHeight - rectHeight) / 2;
 
+  // Pause counter
   int countdown = 3;
   float countdownTimer = 0.0f;
   bool gamePaused = true;
@@ -79,75 +80,87 @@ int main(void)
       rightPaddleY = rectY + rectHeight - paddleHeight;
 
     // Concole output
-    // printf("x: %f y: %f\n", mouse_pos.x, mouse_pos.y);
+    printf("x: %f y: %f\n", mouse_pos.x, mouse_pos.y);
 
-    if (gamePaused)
+    // x:638 y:475
+    bool mouse_on_the_frame = CheckCollisionPointRec(mouse_pos, (Rectangle){5, 5, 630, 455});
+    if (mouse_on_the_frame)
     {
-      countdownTimer += GetFrameTime();
-      if (countdownTimer >= 1.0f)
+      printf("You ARE on the screen!");
+      if (gamePaused)
       {
-        countdownTimer = 0.0f;
-        countdown--;
-        if (countdown <= 0)
+        countdownTimer += GetFrameTime();
+        if (countdownTimer >= 1.0f)
         {
-          gamePaused = false;
+          countdownTimer = 0.0f;
+          countdown--;
+          if (countdown <= 0)
+          {
+            gamePaused = false;
+          }
+        }
+      }
+      else
+      {
+        // Ball movement
+        ball.position.x += ball.speed.x * GetFrameTime();
+        ball.position.y += ball.speed.y * GetFrameTime();
+
+        // Ball collision with top and bottom screen boundaries
+        if (ball.position.y <= ball.radius || ball.position.y >= screenHeight - ball.radius)
+        {
+          ball.speed.y *= -1;
+        }
+
+        // Ball collision with paddles
+        if (ball.position.x - ball.radius <= leftPaddleX + paddleWidth &&
+            ball.position.y >= leftPaddleY &&
+            ball.position.y <= leftPaddleY + paddleHeight)
+        {
+          ball.speed.x *= -1;
+          ball.speed.y += (ball.position.y - (leftPaddleY + paddleHeight / 2)) * 2;
+        }
+
+        if (ball.position.x + ball.radius >= rightPaddleX &&
+            ball.position.y >= rightPaddleY &&
+            ball.position.y <= rightPaddleY + paddleHeight)
+        {
+          ball.speed.x *= -1;
+          ball.speed.y += (ball.position.y - (rightPaddleY + paddleHeight / 2)) * 2;
+        }
+
+        // Ball collision with center rectangle boundaries
+        if (ball.position.x - ball.radius < rectX || ball.position.x + ball.radius > rectX + rectWidth)
+        {
+          ball.speed.x *= -1;
+        }
+        if (ball.position.y - ball.radius < rectY || ball.position.y + ball.radius > rectY + rectHeight)
+        {
+          ball.speed.y *= -1;
+        }
+
+        // Victory!
+        if (ball.position.x + ball.radius > rightPaddleX + paddleWidth)
+        {
+          scoreLeft++;
+          gamePaused = true;
+          countdown = 3;
+          ResetBall(&ball, screenWidth, screenHeight);
+        }
+        else if (ball.position.x - ball.radius < leftPaddleX)
+        {
+          scoreRight++;
+          gamePaused = true;
+          countdown = 3;
+          ResetBall(&ball, screenWidth, screenHeight);
         }
       }
     }
     else
     {
-      // Ball movement
-      ball.position.x += ball.speed.x * GetFrameTime();
-      ball.position.y += ball.speed.y * GetFrameTime();
-
-      // Ball collision with top and bottom screen boundaries
-      if (ball.position.y <= ball.radius || ball.position.y >= screenHeight - ball.radius)
-      {
-        ball.speed.y *= -1;
-      }
-
-      // Ball collision with paddles
-      if (ball.position.x - ball.radius <= leftPaddleX + paddleWidth &&
-          ball.position.y >= leftPaddleY &&
-          ball.position.y <= leftPaddleY + paddleHeight)
-      {
-        ball.speed.x *= -1;
-        ball.speed.y += (ball.position.y - (leftPaddleY + paddleHeight / 2)) * 2;
-      }
-
-      if (ball.position.x + ball.radius >= rightPaddleX &&
-          ball.position.y >= rightPaddleY &&
-          ball.position.y <= rightPaddleY + paddleHeight)
-      {
-        ball.speed.x *= -1;
-        ball.speed.y += (ball.position.y - (rightPaddleY + paddleHeight / 2)) * 2;
-      }
-
-      // Ball collision with center rectangle boundaries
-      if (ball.position.x - ball.radius < rectX || ball.position.x + ball.radius > rectX + rectWidth)
-      {
-        ball.speed.x *= -1;
-      }
-      if (ball.position.y - ball.radius < rectY || ball.position.y + ball.radius > rectY + rectHeight)
-      {
-        ball.speed.y *= -1;
-      }
-
-      // Victory!
-      if (ball.position.x + ball.radius > rightPaddleX + paddleWidth)
-      {
-        scoreLeft++;
-        gamePaused = true;
-        countdown = 3;
-        ResetBall(&ball, screenWidth, screenHeight);
-      }
-      else if (ball.position.x - ball.radius < leftPaddleX)
-      {
-        scoreRight++;
-        gamePaused = true;
-        countdown = 3;
-        ResetBall(&ball, screenWidth, screenHeight);
-      }
+      gamePaused = true;
+      countdown = 3;
+      printf("You are not on the screen!");
     }
 
     BeginDrawing();
@@ -158,7 +171,7 @@ int main(void)
     DrawFPS(10, 10);
 
     DrawText(title, (screenWidth - (strlen(title) * (font_size / 2))) / 2,
-             font_size / 2, font_size, WHITE);
+             (font_size / 2), font_size, WHITE);
 
     DrawText(footer, (screenWidth - MeasureText(footer, 14)) / 2,
              screenHeight - 35, 14, BLACK);
@@ -191,6 +204,15 @@ int main(void)
       int textWidth = MeasureText(countdownText, 60);
       DrawRectangle((screenWidth / 2) - (textWidth / 2) - 10, screenHeight / 2 - (60 / 2) - 10, textWidth + 20, 60 + 20, LIGHTGRAY);
       DrawText(countdownText, (screenWidth / 2) - (textWidth / 2), screenHeight / 2 - (60 / 2), 60, BLACK);
+    }
+
+    // Draw pause
+    if (!mouse_on_the_frame)
+    {
+      int textWidth = MeasureText("Pause", 60);
+      DrawRectangle((screenWidth / 2) - (textWidth / 2) - 10, screenHeight / 2 - (60 / 2) - 10, textWidth + 20, 60 + 20, LIGHTGRAY);
+      DrawRectangleLines((screenWidth / 2) - (textWidth / 2) - 10, screenHeight / 2 - (60 / 2) - 10, textWidth + 20, 60 + 20, BLACK);
+      DrawText("Pause", (screenWidth / 2) - (textWidth / 2), screenHeight / 2 - (60 / 2), 60, BLACK);
     }
 
     EndDrawing();
