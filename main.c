@@ -21,7 +21,7 @@ Vector2 GetRandomBallSpeed(int minSpeed, int maxSpeed)
 void ResetBall(Ball *ball, int screenWidth, int screenHeight)
 {
   ball->position = (Vector2){screenWidth / 2.0f, screenHeight / 2.0f};
-  ball->speed = GetRandomBallSpeed(200, 400);
+  ball->speed = GetRandomBallSpeed(200, 300);
 }
 
 int main(void)
@@ -62,31 +62,27 @@ int main(void)
   float countdownTimer = 0.0f;
   bool gamePaused = true;
 
+  // Players' positions
+  short first_player_y = (screenHeight - 100) / 2;
+  short seccond_player_y = (screenHeight - 100) / 2;
+
   while (!WindowShouldClose())
   {
     // Limit the player's rectangle Y position to stay within the larger rectangle
+    if (first_player_y < rectY)
+      first_player_y = rectY;
+    if (first_player_y + paddleHeight > rectY + rectHeight)
+      first_player_y = rectY + rectHeight - paddleHeight;
+
+    if (seccond_player_y < rectY)
+      seccond_player_y = rectY;
+    if (seccond_player_y + paddleHeight > rectY + rectHeight)
+      seccond_player_y = rectY + rectHeight - paddleHeight;
+
     Vector2 mouse_pos = GetMousePosition();
-    int leftPaddleY = mouse_pos.y - paddleHeight / 2;
-    int rightPaddleY = mouse_pos.y - paddleHeight / 2;
-
-    if (leftPaddleY < rectY)
-      leftPaddleY = rectY;
-    if (leftPaddleY + paddleHeight > rectY + rectHeight)
-      leftPaddleY = rectY + rectHeight - paddleHeight;
-
-    if (rightPaddleY < rectY)
-      rightPaddleY = rectY;
-    if (rightPaddleY + paddleHeight > rectY + rectHeight)
-      rightPaddleY = rectY + rectHeight - paddleHeight;
-
-    // Concole output
-    printf("x: %f y: %f\n", mouse_pos.x, mouse_pos.y);
-
-    // x:638 y:475
     bool mouse_on_the_frame = CheckCollisionPointRec(mouse_pos, (Rectangle){5, 5, 630, 455});
     if (mouse_on_the_frame)
     {
-      printf("You ARE on the screen!");
       if (gamePaused)
       {
         countdownTimer += GetFrameTime();
@@ -114,19 +110,19 @@ int main(void)
 
         // Ball collision with paddles
         if (ball.position.x - ball.radius <= leftPaddleX + paddleWidth &&
-            ball.position.y >= leftPaddleY &&
-            ball.position.y <= leftPaddleY + paddleHeight)
+            ball.position.y >= first_player_y &&
+            ball.position.y <= first_player_y + paddleHeight)
         {
           ball.speed.x *= -1;
-          ball.speed.y += (ball.position.y - (leftPaddleY + paddleHeight / 2)) * 2;
+          ball.speed.y += (ball.position.y - (first_player_y + paddleHeight / 2)) * 2;
         }
 
         if (ball.position.x + ball.radius >= rightPaddleX &&
-            ball.position.y >= rightPaddleY &&
-            ball.position.y <= rightPaddleY + paddleHeight)
+            ball.position.y >= seccond_player_y &&
+            ball.position.y <= seccond_player_y + paddleHeight)
         {
           ball.speed.x *= -1;
-          ball.speed.y += (ball.position.y - (rightPaddleY + paddleHeight / 2)) * 2;
+          ball.speed.y += (ball.position.y - (seccond_player_y + paddleHeight / 2)) * 2;
         }
 
         // Ball collision with center rectangle boundaries
@@ -160,7 +156,6 @@ int main(void)
     {
       gamePaused = true;
       countdown = 3;
-      printf("You are not on the screen!");
     }
 
     BeginDrawing();
@@ -180,27 +175,23 @@ int main(void)
     DrawCircleV(ball.position, ball.radius, BLACK);
 
     // Draw players
-    if ((int)mouse_pos.x <= screenWidth / 2)
+    if (mouse_on_the_frame)
     {
-      // printf("Player 1 active: ");
-      DrawRectangle(100, leftPaddleY, 20, 100, Fade(GREEN, 0.9f));
-      DrawRectangle(screenWidth - 120, (screenHeight - 100) / 2, 20, 100, Fade(RED, 0.9f));
-    }
-    else
-    {
-      // printf("Player 2 active: ");
-      DrawRectangle(rightPaddleX, rightPaddleY, paddleWidth, paddleHeight, Fade(RED, 0.9f));
-      DrawRectangle(leftPaddleX, (screenHeight - 100) / 2, paddleWidth, paddleHeight, Fade(GREEN, 0.9f));
+      DrawRectangle(100, first_player_y, 20, 100, Fade(GREEN, 0.9f));
+      // DrawRectangle(screenWidth - 120, (screenHeight - 100) / 2, 20, 100, Fade(RED, 0.9f));
+
+      DrawRectangle(rightPaddleX, seccond_player_y, paddleWidth, paddleHeight, Fade(RED, 0.9f));
+      // DrawRectangle(leftPaddleX, (screenHeight - 100) / 2, paddleWidth, paddleHeight, Fade(GREEN, 0.9f));
     }
 
     // Draw scores
-    DrawText(TextFormat("Left: %i", scoreLeft), 70, 70, 20, BLACK);
-    DrawText(TextFormat("Right: %i", scoreRight), screenWidth - 140, 70, 20, BLACK);
+    DrawText(TextFormat("Left: %d", scoreLeft), 70, 70, 20, BLACK);
+    DrawText(TextFormat("Right: %d", scoreRight), screenWidth - 140, 70, 20, BLACK);
 
     // Draw countdown
     if (gamePaused && countdown > 0)
     {
-      const char *countdownText = TextFormat("%i", countdown);
+      const char *countdownText = TextFormat("%d", countdown);
       int textWidth = MeasureText(countdownText, 60);
       DrawRectangle((screenWidth / 2) - (textWidth / 2) - 10, screenHeight / 2 - (60 / 2) - 10, textWidth + 20, 60 + 20, LIGHTGRAY);
       DrawText(countdownText, (screenWidth / 2) - (textWidth / 2), screenHeight / 2 - (60 / 2), 60, BLACK);
@@ -215,6 +206,46 @@ int main(void)
       DrawText("Pause", (screenWidth / 2) - (textWidth / 2), screenHeight / 2 - (60 / 2), 60, BLACK);
     }
 
+    // Draw key pressed
+    short pressed_key = GetKeyPressed();
+    char key_string[2];
+    if (pressed_key)
+    {
+      key_string[0] = pressed_key > 255 ? key_string[0] : (char)pressed_key;
+    }
+    if (key_string[0] != '\0')
+    {
+      DrawText(key_string, 27, screenHeight - 196, 14, BLUE);
+      DrawRectangleLines(20, screenHeight - 200, 22, 22, BLACK);
+    }
+
+    // Player`s movement
+    if (IsKeyDown((char)'W'))
+    {
+      first_player_y -= 7;
+    }
+    else if (IsKeyDown((char)'S'))
+    {
+      first_player_y += 7;
+    }
+
+    static const char *up_down = NULL;
+    if (IsKeyDown(264))
+    {
+      seccond_player_y += 7;
+      up_down = "Down";
+    }
+    else if (IsKeyDown(265))
+    {
+      seccond_player_y -= 7;
+      up_down = "Up";
+    }
+
+    if (up_down != NULL)
+    {
+      DrawText(up_down, screenWidth - 40, screenHeight - 196, 14, BLUE);
+      DrawRectangleLines(screenWidth - 45, screenHeight - 200, 40, 22, BLACK);
+    }
     EndDrawing();
   }
   return 0;
