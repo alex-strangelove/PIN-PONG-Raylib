@@ -1,5 +1,5 @@
 PROJECT_NAME:=ping_pong_raylib
-SRC:=main.c
+SRC:=main.c game.c
 CC:=clang
 CFLAGS:=-Wall -Werror
 
