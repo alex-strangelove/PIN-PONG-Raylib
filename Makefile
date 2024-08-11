@@ -1,7 +1,7 @@
 PROJECT_NAME:=ping_pong_raylib
-SRC:=main.c game.c
+SRC:=main.c game.c start_menu.c
 CC:=clang
-CFLAGS:=-Wall -Werror
+CFLAGS:=-Wall -Werror -lm
 
 $(PROJECT_NAME):
 	$(CC) $(CFLAGS) $(shell pkg-config --libs --cflags raylib) $(SRC) -o $(PROJECT_NAME)

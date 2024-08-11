@@ -1,9 +1,8 @@
 #include "game.h"
+#include "start_menu.h"
 #include "raylib.h"
 #include <stdbool.h>
-
-#define WIDTH 640
-#define HEIGHT 480
+#include <stdio.h>
 
 WindowSettings window = {
     .title = "Ping pong",
@@ -42,14 +41,31 @@ Player player2 = {
     .position_y = (HEIGHT - 100) / 2,
 };
 
-int main(void) {
-  // Init window
-  InitWindow(WIDTH, HEIGHT, "Pong Online");
-  SetMouseCursor(MOUSE_CURSOR_ARROW);
-  SetTargetFPS(window.targetFPS);
+bool multiplayer_mode = false;
+bool singleplayer_mode = false;
 
-  // Main game loop
-  main_loop(player1, player2, rect, pd, state, ball, window);
+int main(void)
+{
+    // Init window
+    InitWindow(WIDTH, HEIGHT, "Pong Online");
+    SetMouseCursor(MOUSE_CURSOR_ARROW);
+    SetTargetFPS(window.targetFPS);
 
-  return 0;
+    singleplayer_mode = start_menu();
+
+    while (!WindowShouldClose())
+    {
+        if (singleplayer_mode)
+        {
+            // Main game loop
+            printf("%s\n", "true");
+            main_loop(player1, player2, rect, pd, state, ball, window);
+        }
+        else if (multiplayer_mode)
+        {
+            // Function for multiplayer start
+        }
+    }
+
+    return 0;
 }
