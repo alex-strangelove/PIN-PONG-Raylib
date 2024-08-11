@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <string.h>
+#include <sys/types.h>
 
 // Types
 typedef struct Ball {
