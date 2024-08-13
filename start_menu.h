@@ -9,6 +9,11 @@ typedef struct
     short port;
 } IpSettings;
 
-bool start_menu();
-bool PopWelcome(Rectangle pop);
+extern bool show_start_popup;
+extern bool show_ipset_popup;
+extern bool on_window_quit;
+extern bool singleplayer;
+
+int start_menu(void);
+void PopWelcome(Rectangle pop);
 void PopIPSettings(Rectangle pop, IpSettings *sets, char ip_str[], char port_str[], bool ip_active, bool port_active);

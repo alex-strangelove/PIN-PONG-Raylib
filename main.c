@@ -41,9 +41,6 @@ Player player2 = {
     .position_y = (HEIGHT - 100) / 2,
 };
 
-bool multiplayer_mode = false;
-bool singleplayer_mode = false;
-
 int main(void)
 {
     // Init window
@@ -51,21 +48,18 @@ int main(void)
     SetMouseCursor(MOUSE_CURSOR_ARROW);
     SetTargetFPS(window.targetFPS);
 
-    singleplayer_mode = start_menu();
-
-    while (!WindowShouldClose())
+    while (show_start_popup || show_ipset_popup)
     {
-        if (singleplayer_mode)
+        if (start_menu() == 1)
         {
-            // Main game loop
-            printf("%s\n", "true");
-            main_loop(player1, player2, rect, pd, state, ball, window);
-        }
-        else if (multiplayer_mode)
-        {
-            // Function for multiplayer start
+            CloseWindow();
+            return 0;
         }
     }
 
+    if (singleplayer)
+    {
+        return main_loop(player1, player2, rect, pd, state, ball, window);
+    }
     return 0;
 }
